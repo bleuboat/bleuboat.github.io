@@ -2,11 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Name API</title>
-</head>
-<body>
     <script>
-        // 解析URL中的查询参数
+        // 解析URL参数
         const params = new URLSearchParams(window.location.search);
         const name = params.get('name');
         
@@ -14,24 +11,46 @@
         let response;
         if (name) {
             response = {
+                "success": true,
                 "message": `Hello, ${name}!`,
                 "received_name": name,
                 "length": name.length,
                 "uppercase": name.toUpperCase(),
-                "lowercase": name.toLowerCase()
+                "lowercase": name.toLowerCase(),
+                "timestamp": new Date().toISOString()
             };
         } else {
             response = {
+                "success": false,
                 "error": "请提供name参数",
-                "usage": "https://yourusername.github.io/api?name=example"
+                "usage": "https://bleuboat.github.io/api.html?name=example",
+                "timestamp": new Date().toISOString()
             };
         }
         
-        // 设置响应头为JSON类型
-        document.title = "API Response";
-        document.body.innerHTML = JSON.stringify(response, null, 2);
-        document.body.style.whiteSpace = "pre";
-        document.body.style.fontFamily = "monospace";
+        // 将JSON数据转换为字符串
+        const jsonStr = JSON.stringify(response, null, 2);
+        
+        // 尝试设置正确的响应头（在GitHub Pages上可能有限制）
+        if (window.parent && window.parent.postMessage) {
+            window.parent.postMessage({
+                type: 'jsonResponse',
+                data: response
+            }, '*');
+        }
+        
+        // 显示JSON内容
+        document.write(`<pre style="font-family: monospace; white-space: pre;">${jsonStr}</pre>`);
+        
+        // 对于支持的环境，尝试设置Content-Type
+        (function() {
+            const headers = document.createElement('meta');
+            headers.httpEquiv = 'Content-Type';
+            headers.content = 'application/json; charset=utf-8';
+            document.head.appendChild(headers);
+        })();
     </script>
+</head>
+<body>
 </body>
 </html>
